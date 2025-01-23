@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
+	"os"
+	"time"
 )
 
 type Handler struct {
@@ -79,4 +82,34 @@ func (h *Handler) geocode(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return // не забываем прекратить обработку нашего handler (ручки)
 	}
+}
+
+func (h *Handler) swaggerUI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	var htmlB, err = os.ReadFile("./swagger/index.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	tmpl, err := template.New("swagger").Parse(string(htmlB))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	err = tmpl.Execute(w, struct {
+		Time int64
+	}{
+		Time: time.Now().Unix(),
+	})
+	if err != nil {
+		return
+	}
+}
+
+func (h *Handler) swaggerGET(w http.ResponseWriter, r *http.Request) {
+	var htmlB, err = os.ReadFile("./swagger/swagger.yaml")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Write(htmlB)
 }

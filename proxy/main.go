@@ -15,7 +15,11 @@ func main() {
 	h := NewHandler()
 
 	r.Use(middlewareCORS, redirectMiddleware)
-
+	r.Get("/swagger", h.swaggerUI)
+	r.Route("/swagger", func(r chi.Router) {
+		r.Get("/", h.swaggerUI)
+		r.Get("/swagger.yaml", h.swaggerGET)
+	})
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/address", func(r chi.Router) {
 			r.Post("/search", h.search)
@@ -53,8 +57,9 @@ func redirectMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		checkApi := strings.Contains(r.RequestURI, "/api")
+		checkSwagger := strings.Contains(r.RequestURI, "/swagger")
 
-		if !checkApi {
+		if !checkApi && !checkSwagger {
 			proxy := NewProxy("http://hugo:1313")
 
 			proxy.ServeHTTP(w, r)
