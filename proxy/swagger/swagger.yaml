@@ -1,0 +1,128 @@
+openapi: 3.0.2
+info:
+  title: Геосервис
+  description: |-
+    Геосервис возвращает список местоположений по адресу или конкретным координатам
+  termsOfService: https://create.mit-license.org/
+  contact:
+    name: Антон
+    url: https://github.com/anton4ik8374/kata
+    email: anton4ik2251@yandex.ru
+  license:
+    name: MIT
+    url: https://create.mit-license.org/
+  version: 1.0.0
+servers:
+  - url: "http://localhost:8080/api/address/"
+    description: Локальный сервер
+paths:
+  /geocode:
+    post:
+      tags:
+        - geocode
+      summary: Поиск по долготе и широте
+      description: Ищет точки по долготе и широте. Возвращает список совпадений
+      operationId: geocode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                lat:
+                  description: Широта
+                  type: string
+                  example: '55.755829'
+                Lng:
+                  description: Долгота
+                  type: string
+                  example: '37.617627'
+              required: [ "lat", "Lng" ]
+      responses:
+        200:
+          description: "Поиск завершен успешно"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/200'
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/404'
+  /search:
+    post:
+      tags:
+        - search
+      summary: Поиск по адресу
+      description: Ищет точки по адресу формата "страна Город Улица Дом ...". Возвращает список совпадений
+      operationId: search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                query:
+                  description: Адрес для поиска
+                  type: string
+                  example: "Новосибирск пр. Энергетиков 45"
+              required: ["query"]
+      responses:
+        200:
+          description: "Поиск завершен успешно"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/200'
+        404:
+          description: Not found response
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/404'
+components:
+  schemas:
+    404:
+      title: Weather not found
+      type: string
+      example: Not found
+    200:
+      title: Ответ с адресами
+      type: object
+      properties:
+        addresses:
+          type: array
+          description: Массив объектов
+          items:
+            type: object
+            properties:
+              city:
+                type: string
+                description: Город
+                example: Москва
+              street:
+                type: string
+                description: Улица
+                example: Победы
+              house:
+                type: string
+                description: Дом
+                example: 1
+              lat:
+                type: string
+                description: Широта
+                example: 55.755829
+              lon:
+                type: string
+                description: Долгота
+                example: 37.617627
+tags:
+  - name: geocode
+    description: Маршрут для геокодирования по долготе и широте
+  - name: search
+    description: Маршрут для геокодирования по адресу
+externalDocs:
+  description: API Documentation
+  url: https://openweathermap.org/api
